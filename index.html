@@ -1,0 +1,261 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Snip – best clips from any YouTube video</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&family=Figtree:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#EEF0FF;--surface:#FFFFFF;--ink:#12143A;--muted:#575B8A;--brand:#2438F5;--on-brand:#FFFFFF;--pop:#FFE45C;--line:#D3D8FF;--strip:#12143A;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0D0F2E;--surface:#171A47;--ink:#EEF0FF;--muted:#A5AAE2;--brand:#8792FF;--on-brand:#0D0F2E;--line:#2B306E;--strip:#06071C;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#0D0F2E;--surface:#171A47;--ink:#EEF0FF;--muted:#A5AAE2;--brand:#8792FF;--on-brand:#0D0F2E;--line:#2B306E;--strip:#06071C;color-scheme:dark}
+html{scroll-padding-top:env(safe-area-inset-top,0px);-webkit-text-size-adjust:100%}
+*,*::before,*::after{box-sizing:inherit}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:Figtree,system-ui,-apple-system,"Segoe UI",sans-serif;font-size:16px;line-height:1.5}
+main{max-width:520px;margin:0 auto;padding:20px 18px 48px}
+.top{display:flex;align-items:center;justify-content:space-between}
+.logo{font-family:"Bricolage Grotesque",system-ui,sans-serif;font-weight:800;font-size:26px;letter-spacing:-.02em;color:var(--brand)}
+.tag{font-size:13px;color:var(--muted);font-weight:500}
+h1{font-family:"Bricolage Grotesque",system-ui,sans-serif;font-weight:800;font-size:clamp(38px,12vw,56px);line-height:.98;letter-spacing:-.035em;margin:30px 0 12px}
+.lead{color:var(--muted);margin:0;max-width:34ch}
+/* film strip */
+.strip{position:relative;height:88px;border-radius:14px;background:var(--strip);overflow:hidden;margin:26px 0 22px}
+.strip::before,.strip::after{content:"";position:absolute;left:0;right:0;height:10px;background:radial-gradient(circle at 8px 5px,var(--bg) 3px,transparent 3.6px) 0 0/16px 10px repeat-x}
+.strip::before{top:4px}.strip::after{bottom:4px}
+.lane{position:absolute;left:0;right:0;top:18px;bottom:18px;background:repeating-linear-gradient(90deg,rgba(255,255,255,.14) 0 2px,transparent 2px 7px)}
+.seg{position:absolute;top:0;bottom:0;border:0;padding:0;background:var(--pop);border-radius:6px;cursor:pointer;transform-origin:left;animation:grow .5s cubic-bezier(.2,.8,.2,1) both}
+.seg:focus-visible{outline:3px solid #fff;outline-offset:2px}
+.scan{position:absolute;top:0;bottom:0;left:-40px;width:40px;display:none;background:linear-gradient(90deg,transparent,rgba(255,228,92,.7),transparent)}
+.strip.scanning .scan{display:block;animation:sweep 1.1s linear infinite}
+@keyframes sweep{to{left:100%}}
+@keyframes grow{from{transform:scaleX(0);opacity:0}to{transform:none;opacity:1}}
+/* form */
+.card{background:var(--surface);border:1.5px solid var(--line);border-radius:24px;padding:16px}
+label.f{display:block;font-weight:600;font-size:15px;margin-bottom:8px}
+.row{display:flex;gap:8px}
+input[type=url]{flex:1;min-width:0;height:54px;border-radius:16px;border:1.5px solid var(--line);background:var(--bg);color:var(--ink);padding:0 14px;font:inherit;font-size:16px}
+input[type=url]:focus{outline:3px solid var(--brand);outline-offset:1px;border-color:transparent}
+input.bad{border-color:#E5484D}
+.ghost{height:54px;padding:0 16px;border-radius:16px;border:1.5px solid var(--line);background:transparent;color:var(--ink);font:inherit;font-weight:600;cursor:pointer}
+.err{color:#E5484D;font-size:14px;min-height:20px;margin:8px 2px 0}
+.grp{margin-top:6px}
+.grp p{margin:0 0 8px;font-weight:600;font-size:15px}
+.chips{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
+.chip{min-height:44px;padding:0 18px;border-radius:999px;border:1.5px solid var(--line);background:transparent;color:var(--ink);font:inherit;font-weight:600;cursor:pointer}
+.chip[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.go{width:100%;height:58px;border:0;border-radius:18px;background:var(--brand);color:var(--on-brand);font-family:"Bricolage Grotesque",system-ui,sans-serif;font-weight:800;font-size:19px;cursor:pointer;margin-top:4px}
+.go:active{transform:scale(.985)}
+.go[disabled]{opacity:.6}
+button:focus-visible,a:focus-visible{outline:3px solid var(--brand);outline-offset:2px}
+/* progress */
+.prog{display:none;margin-top:18px}
+.prog.on{display:block}
+.bar{height:8px;border-radius:99px;background:var(--line);overflow:hidden}
+.bar i{display:block;height:100%;width:0;background:var(--brand);border-radius:99px;transition:width .8s ease}
+.stage{margin:10px 2px 0;color:var(--muted);font-size:15px}
+/* results */
+#results{display:none;margin-top:30px}
+#results.on{display:block}
+h2{font-family:"Bricolage Grotesque",system-ui,sans-serif;font-weight:800;font-size:28px;letter-spacing:-.025em;margin:0 0 6px}
+.note{background:var(--pop);color:#12143A;border-radius:14px;padding:12px 14px;font-size:14px;margin:12px 0 18px}
+.clip{background:var(--surface);border:1.5px solid var(--line);border-radius:22px;overflow:hidden;margin-bottom:14px;scroll-margin-top:12px}
+.clip.hl{border-color:var(--brand);box-shadow:0 0 0 3px var(--brand)}
+.art{position:relative;aspect-ratio:16/8;display:flex;align-items:flex-end;padding:12px}
+.art b{position:absolute;top:12px;left:12px;background:rgba(18,20,58,.78);color:#fff;border-radius:999px;font-size:13px;padding:3px 10px;font-weight:600}
+.art em{position:absolute;top:12px;right:12px;background:var(--pop);color:#12143A;border-radius:999px;font-size:13px;padding:3px 10px;font-style:normal;font-weight:700}
+.art span{font-family:"Bricolage Grotesque",system-ui,sans-serif;font-weight:800;font-size:24px;line-height:1.05;color:#fff;letter-spacing:-.02em;text-shadow:0 2px 14px rgba(0,0,0,.25)}
+.body{padding:14px}
+.time{margin:0 0 12px;color:var(--muted);font-size:15px}
+.acts{display:flex;gap:8px}
+.dl{flex:1;height:50px;border:0;border-radius:14px;background:var(--brand);color:var(--on-brand);font:inherit;font-weight:700;cursor:pointer}
+.sm{height:50px;padding:0 14px;display:inline-flex;align-items:center;justify-content:center;border-radius:14px;border:1.5px solid var(--line);background:transparent;color:var(--ink);font:inherit;font-weight:600;text-decoration:none;cursor:pointer}
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translate(-50%,30px);background:var(--ink);color:var(--bg);padding:12px 18px;border-radius:14px;font-size:14px;font-weight:500;max-width:min(440px,90vw);opacity:0;pointer-events:none;transition:.25s;z-index:20;text-align:center}
+.toast.on{opacity:1;transform:translate(-50%,0)}
+footer{margin-top:34px;color:var(--muted);font-size:13px;text-align:center}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<main>
+  <div class="top"><span class="logo">snip</span><span class="tag">YouTube → clips</span></div>
+  <h1>Paste a video. Keep the best bits.</h1>
+  <p class="lead">Drop in a YouTube link and Snip picks the strongest moments as short clips.</p>
+
+  <div class="strip" id="strip" aria-hidden="false"><div class="lane"></div><div id="segs"></div><div class="scan"></div></div>
+
+  <section class="card" aria-label="Make clips">
+    <label class="f" for="url">YouTube link</label>
+    <div class="row">
+      <input id="url" type="url" inputmode="url" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="youtube.com/watch?v=…">
+      <button class="ghost" id="paste" type="button">Paste</button>
+    </div>
+    <p class="err" id="err" role="alert"></p>
+
+    <div class="grp"><p id="lenl">Clip length</p>
+      <div class="chips" role="group" aria-labelledby="lenl" id="len">
+        <button class="chip" type="button" data-v="15" aria-pressed="false">15 sec</button>
+        <button class="chip" type="button" data-v="30" aria-pressed="true">30 sec</button>
+        <button class="chip" type="button" data-v="60" aria-pressed="false">60 sec</button>
+      </div></div>
+    <div class="grp"><p id="cntl">Number of clips</p>
+      <div class="chips" role="group" aria-labelledby="cntl" id="cnt">
+        <button class="chip" type="button" data-v="3" aria-pressed="false">3</button>
+        <button class="chip" type="button" data-v="5" aria-pressed="true">5</button>
+        <button class="chip" type="button" data-v="8" aria-pressed="false">8</button>
+      </div></div>
+    <button class="go" id="go" type="button">Find best clips</button>
+
+    <div class="prog" id="prog"><div class="bar"><i id="fill"></i></div><p class="stage" id="stage" aria-live="polite"></p></div>
+  </section>
+
+  <section id="results" aria-live="polite">
+    <h2 id="rtitle">Your clips</h2>
+    <div class="note" id="note">Preview mode: the moments below are sample picks for this link. Real downloads need a video-cutting server connected to this page.</div>
+    <div id="list"></div>
+  </section>
+
+  <footer>Only use videos you own or have permission to clip.</footer>
+</main>
+<div class="toast" id="toast" role="status"></div>
+
+<script>
+(function(){
+  var $=function(s){return document.querySelector(s)};
+  var state={len:30,cnt:5,busy:false};
+
+  function parseId(raw){
+    try{
+      var u=raw.trim(); if(!u) return null;
+      var x=new URL(/^https?:\/\//i.test(u)?u:"https://"+u);
+      var h=x.hostname.replace(/^www\./,"").replace(/^m\./,""), id="";
+      if(h==="youtu.be") id=x.pathname.slice(1).split("/")[0];
+      else if(h==="youtube.com"||h==="music.youtube.com"){
+        if(x.pathname==="/watch") id=x.searchParams.get("v")||"";
+        else { var m=x.pathname.match(/^\/(shorts|embed|live)\/([\w-]{11})/); if(m) id=m[2]; }
+      }
+      return /^[\w-]{11}$/.test(id)?id:null;
+    }catch(e){return null}
+  }
+  function rng(str){
+    var h=1779033703^str.length;
+    for(var i=0;i<str.length;i++){h=Math.imul(h^str.charCodeAt(i),3432918353);h=h<<13|h>>>19}
+    var a=h>>>0;
+    return function(){a|=0;a=a+0x6D2B79F5|0;var t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}
+  }
+  function fmt(s){s=Math.round(s);var m=Math.floor(s/60),r=s%60;return m+":"+(r<10?"0":"")+r}
+  var TITLES=["Strong opening hook","Big reaction moment","Key takeaway","Funniest stretch","Plot twist","Best tip in the video","Energy peak","Quotable line","Surprising reveal","Crowd favorite"];
+
+  function makeClips(id,len,n){
+    var r=rng(id), D=480+Math.floor(r()*2400), zone=D/n, out=[], t=TITLES.slice();
+    for(var i=0;i<n;i++){
+      var lo=i*zone+4, hi=(i+1)*zone-len-4; if(hi<lo) hi=lo;
+      var start=Math.floor(lo+r()*(hi-lo));
+      var ti=Math.floor(r()*t.length), title=t.splice(ti,1)[0];
+      out.push({start:start,len:len,title:title,score:Math.floor(78+r()*21),hue:Math.floor(r()*360)});
+    }
+    out.sort(function(a,b){return b.score-a.score});
+    return {D:D,clips:out};
+  }
+
+  function toast(msg){var t=$("#toast");t.textContent=msg;t.classList.add("on");clearTimeout(toast.k);toast.k=setTimeout(function(){t.classList.remove("on")},3200)}
+
+  function pick(groupSel,key){
+    $(groupSel).addEventListener("click",function(e){
+      var b=e.target.closest(".chip"); if(!b) return;
+      state[key]=+b.dataset.v;
+      this.querySelectorAll(".chip").forEach(function(c){c.setAttribute("aria-pressed",c===b?"true":"false")});
+    });
+  }
+  pick("#len","len"); pick("#cnt","cnt");
+
+  $("#paste").addEventListener("click",function(){
+    if(navigator.clipboard&&navigator.clipboard.readText){
+      navigator.clipboard.readText().then(function(t){$("#url").value=t;$("#err").textContent="";$("#url").classList.remove("bad")}).catch(function(){toast("Couldn’t read the clipboard. Long-press the field to paste.")});
+    } else toast("Long-press the field to paste.");
+  });
+
+  function stage(text,pct){$("#stage").textContent=text;$("#fill").style.width=pct+"%"}
+
+  var live=false, vid="";
+  fetch("/api/health").then(function(r){return r.ok?r.json():Promise.reject()}).then(function(j){if(j&&j.ok){live=true;$("#note").style.display="none"}}).catch(function(){});
+
+  function finish(id,res,jobId){
+    stage("Done",100); render(id,res,jobId);
+    $("#strip").classList.remove("scanning");
+    setTimeout(function(){$("#prog").classList.remove("on");$("#fill").style.width="0"},500);
+    var go=$("#go"); go.disabled=false; go.textContent="Find clips from another link"; state.busy=false;
+    $("#results").classList.add("on");
+    $("#results").scrollIntoView({behavior:"smooth",block:"start"});
+  }
+  function fail(e){
+    $("#strip").classList.remove("scanning"); $("#prog").classList.remove("on"); $("#fill").style.width="0";
+    var go=$("#go"); go.disabled=false; go.textContent="Find best clips"; state.busy=false;
+    $("#err").textContent=(e&&e.message)||"Something went wrong. Try again.";
+  }
+  function poll(jobId){
+    fetch("/api/jobs/"+jobId).then(function(r){return r.json()}).then(function(j){
+      if(j.status==="error") return fail(new Error(j.error));
+      stage(j.stage,j.pct);
+      if(j.status!=="done") return setTimeout(function(){poll(jobId)},1200);
+      finish(vid,{D:j.duration,clips:j.clips.map(function(c,i){c.hue=(c.start*7+i*40)%360;return c})},jobId);
+    }).catch(fail);
+  }
+
+  $("#go").addEventListener("click",function(){
+    if(state.busy) return;
+    var inp=$("#url"), id=parseId(inp.value);
+    if(!id){inp.classList.add("bad");$("#err").textContent="That doesn’t look like a YouTube link. Try one from the Share button.";inp.focus();return}
+    inp.classList.remove("bad");$("#err").textContent="";
+    vid=id; state.busy=true; var go=$("#go"); go.disabled=true; go.textContent="Working…";
+    $("#results").classList.remove("on"); $("#segs").innerHTML="";
+    $("#prog").classList.add("on"); $("#strip").classList.add("scanning");
+    if(live){
+      stage("Starting…",4);
+      fetch("/api/jobs",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({url:inp.value.trim(),len:state.len,count:state.cnt})})
+        .then(function(r){return r.json().then(function(j){if(!r.ok)throw new Error(j.error||"Something went wrong");return j})})
+        .then(function(j){poll(j.id)}).catch(fail);
+      return;
+    }
+    stage("Reading the video…",12);
+    [["Listening for the high points…",42],["Scoring each moment…",72],["Cutting your clips…",94]].forEach(function(s,i){setTimeout(function(){stage(s[0],s[1])},900*(i+1))});
+    setTimeout(function(){finish(id)},3800);
+  });
+
+  function render(id,liveRes,jobId){
+    var res=liveRes||makeClips(id,state.len,state.cnt), list=$("#list"), segs=$("#segs");
+    list.innerHTML=""; segs.innerHTML="";
+    $("#rtitle").textContent=res.clips.length+" clips, "+fmt(res.D)+" video";
+    res.clips.forEach(function(c,i){
+      var left=c.start/res.D*100, w=Math.max(c.len/res.D*100,4.5);
+      var s=document.createElement("button");
+      s.className="seg"; s.type="button"; s.style.left=left+"%"; s.style.width=w+"%"; s.style.animationDelay=(i*90)+"ms";
+      s.setAttribute("aria-label","Jump to clip at "+fmt(c.start));
+      s.addEventListener("click",function(){var el=document.getElementById("clip"+i);el.scrollIntoView({behavior:"smooth",block:"center"});el.classList.add("hl");setTimeout(function(){el.classList.remove("hl")},1400)});
+      segs.appendChild(s);
+
+      var link="https://www.youtube.com/watch?v="+id+"&t="+c.start+"s";
+      var card=document.createElement("article"); card.className="clip"; card.id="clip"+i;
+      card.innerHTML=
+        '<div class="art" style="background:linear-gradient(135deg,hsl('+c.hue+' 80% 48%),hsl('+((c.hue+50)%360)+' 85% 32%))">'+
+        '<b>'+c.len+' sec</b><em>'+c.score+' match</em><span>'+c.title+'</span></div>'+
+        '<div class="body"><p class="time">'+fmt(c.start)+' to '+fmt(c.start+c.len)+' in the video</p>'+
+        '<div class="acts"><button class="dl" type="button">Download clip</button>'+
+        '<a class="sm" href="'+link+'" target="_blank" rel="noopener">Watch</a>'+
+        '<button class="sm cp" type="button">Copy link</button></div></div>';
+      card.querySelector(".dl").addEventListener("click",function(){
+        if(jobId){var a=document.createElement("a");a.href="/api/jobs/"+jobId+"/clips/"+i+"/download";a.download="";document.body.appendChild(a);a.click();a.remove();toast("Cutting your clip. The download starts in a moment.")}
+        else toast("Downloads need a video-cutting server. This preview shows where each clip sits.")});
+      card.querySelector(".cp").addEventListener("click",function(){
+        if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(link).then(function(){toast("Link to "+fmt(c.start)+" copied")}).catch(function(){toast(link)})}
+        else toast(link);
+      });
+      list.appendChild(card);
+    });
+  }
+})();
+</script>
+</body>
+</html>
