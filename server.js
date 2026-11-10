@@ -13,6 +13,16 @@ const MAX_ACTIVE = +process.env.MAX_ACTIVE_JOBS || 2;     // jobs analysed at on
 const TMP = path.join(os.tmpdir(), "snip");
 fs.mkdirSync(TMP, { recursive: true });
 
+// Optional YouTube cookies (Render Secret File named cookies.txt). Copied to a
+// writable place because yt-dlp tries to update the cookie file.
+const COOKIES = (() => {
+  const src = process.env.COOKIES_FILE || "/etc/secrets/cookies.txt";
+  if (!fs.existsSync(src)) return null;
+  const dst = path.join(TMP, "cookies.txt");
+  fs.copyFileSync(src, dst);
+  return dst;
+})();
+
 const app = express();
 app.use(express.json({ limit: "10kb" }));
 app.use(express.static(path.join(__dirname, "public")));
@@ -24,6 +34,7 @@ const hits = new Map();
 let active = 0;
 
 function run(cmd, args) {
+  if (cmd === "yt-dlp" && COOKIES) args = ["--cookies", COOKIES, ...args];
   return new Promise((resolve, reject) => {
     const p = spawn(cmd, args);            // args array, no shell: no injection
     let out = "", err = "";
